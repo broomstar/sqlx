@@ -6,8 +6,8 @@ use crate::mysql::MySql;
 use crate::types::HasSqlType;
 
 impl HasSqlType<bool> for MySql {
-    fn metadata() -> MySqlTypeMetadata {
-        MySqlTypeMetadata::new(Type::TINY)
+    fn accepts() -> MySqlType {
+        MySqlType::TINY
     }
 }
 

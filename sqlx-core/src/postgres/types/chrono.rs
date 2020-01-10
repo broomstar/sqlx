@@ -1,27 +1,29 @@
-use crate::decode::{Decode, DecodeError};
-use crate::encode::Encode;
-use crate::postgres::types::PgTypeMetadata;
-use crate::postgres::Postgres;
-use crate::types::HasSqlType;
-use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use std::convert::TryInto;
 use std::mem;
 
+use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
+
+use crate::decode::{Decode, DecodeError};
+use crate::encode::Encode;
+use crate::postgres::protocol::TypeId;
+use crate::postgres::Postgres;
+use crate::types::HasSqlType;
+
 impl HasSqlType<NaiveTime> for Postgres {
-    fn metadata() -> PgTypeMetadata {
-        PgTypeMetadata::binary(1083, 1183)
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::TIME]
     }
 }
 
 impl HasSqlType<NaiveDate> for Postgres {
-    fn metadata() -> PgTypeMetadata {
-        PgTypeMetadata::binary(1082, 1182)
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::DATE]
     }
 }
 
 impl HasSqlType<NaiveDateTime> for Postgres {
-    fn metadata() -> PgTypeMetadata {
-        PgTypeMetadata::binary(1114, 1115)
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::TIMESTAMP]
     }
 }
 
@@ -29,8 +31,35 @@ impl<Tz> HasSqlType<DateTime<Tz>> for Postgres
 where
     Tz: TimeZone,
 {
-    fn metadata() -> PgTypeMetadata {
-        PgTypeMetadata::binary(1184, 1185)
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::TIMESTAMPTZ]
+    }
+}
+
+impl HasSqlType<[NaiveTime]> for Postgres {
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::ARRAY_TIME]
+    }
+}
+
+impl HasSqlType<[NaiveDate]> for Postgres {
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::ARRAY_DATE]
+    }
+}
+
+impl HasSqlType<[NaiveDateTime]> for Postgres {
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::ARRAY_TIMESTAMP]
+    }
+}
+
+impl<Tz> HasSqlType<[DateTime<Tz>]> for Postgres
+where
+    Tz: TimeZone,
+{
+    fn compatible() -> &'static [TypeId] {
+        &[TypeId::ARRAY_TIMESTAMPTZ]
     }
 }
 
@@ -51,7 +80,7 @@ impl Encode<Postgres> for NaiveTime {
         Encode::<Postgres>::encode(&micros, buf);
     }
 
-    fn size_hint(&self) -> usize {
+    fn size_hint() -> usize {
         mem::size_of::<i64>()
     }
 }
@@ -76,7 +105,7 @@ impl Encode<Postgres> for NaiveDate {
         Encode::<Postgres>::encode(&days, buf)
     }
 
-    fn size_hint(&self) -> usize {
+    fn size_hint() -> usize {
         mem::size_of::<i32>()
     }
 }
@@ -107,7 +136,7 @@ impl Encode<Postgres> for NaiveDateTime {
         Encode::<Postgres>::encode(&micros, buf);
     }
 
-    fn size_hint(&self) -> usize {
+    fn size_hint() -> usize {
         mem::size_of::<i64>()
     }
 }
@@ -134,7 +163,7 @@ where
         Encode::<Postgres>::encode(&self.naive_utc(), buf);
     }
 
-    fn size_hint(&self) -> usize {
+    fn size_hint() -> usize {
         mem::size_of::<i64>()
     }
 }

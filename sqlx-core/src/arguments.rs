@@ -62,7 +62,7 @@ macro_rules! impl_into_arguments {
                 let mut arguments = <$B as crate::database::Database>::Arguments::default();
 
                 let binds = 0 $(+ { $idx; 1 } )+;
-                let bytes = 0 $(+ crate::encode::Encode::size_hint(&self.$idx))+;
+                let bytes = 0 $(+ <$T as crate::encode::Encode<$B>>::size_hint())+;
 
                 arguments.reserve(binds, bytes);
 

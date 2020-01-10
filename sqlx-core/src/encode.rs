@@ -29,15 +29,18 @@ where
         IsNull::No
     }
 
-    fn size_hint(&self) -> usize {
-        mem::size_of_val(self)
+    fn size_hint() -> usize
+    where
+        Self: Sized,
+    {
+        mem::size_of::<Self>()
     }
 }
 
 impl<T: ?Sized, DB> Encode<DB> for &'_ T
 where
     DB: Database + HasSqlType<T>,
-    T: Encode<DB>,
+    T: Sized + Encode<DB>,
 {
     fn encode(&self, buf: &mut Vec<u8>) {
         (*self).encode(buf)
@@ -47,8 +50,11 @@ where
         (*self).encode_nullable(buf)
     }
 
-    fn size_hint(&self) -> usize {
-        (*self).size_hint()
+    fn size_hint() -> usize
+    where
+        Self: Sized,
+    {
+        T::size_hint()
     }
 }
 
@@ -72,11 +78,11 @@ where
         }
     }
 
-    fn size_hint(&self) -> usize {
-        if self.is_some() {
-            mem::size_of::<T>()
-        } else {
-            0
-        }
+    fn size_hint() -> usize
+    where
+        Self: Sized,
+    {
+        // size is 0 if None but we assume Some
+        mem::size_of::<T>()
     }
 }

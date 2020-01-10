@@ -1,13 +1,8 @@
 use crate::io::{Buf, ByteStr};
 use crate::postgres::protocol::Decode;
 use byteorder::NetworkEndian;
+use std::fmt::{self, Debug};
 use std::ops::Range;
-use std::{
-    fmt::{self, Debug},
-    io,
-    pin::Pin,
-    ptr::NonNull,
-};
 
 pub struct DataRow {
     buffer: Box<[u8]>,
@@ -58,8 +53,6 @@ impl Decode for DataRow {
 
 impl Debug for DataRow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use crate::row::Row;
-
         write!(f, "DataRow(")?;
 
         let len = self.values.len();

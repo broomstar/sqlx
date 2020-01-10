@@ -13,7 +13,7 @@ mod uint;
 mod chrono;
 
 #[derive(Default, Debug)]
-pub struct MySqlTypeMetadata {
+pub struct MySqlType {
     pub(crate) r#type: Type,
     pub(crate) is_unsigned: bool,
 }
